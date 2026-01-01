@@ -162,11 +162,21 @@ class KocomGateway:
                     continue
                 chunk = await self.conn.recv(512, RECV_POLL_SEC)
                 if chunk:
+                    if "5b4543484f5d" == chunk.hex() :
+                        # [ECHO] 패킷에 대한 처리
+                        LOGGER.debug("echo Packet received raw=%s", chunk.hex())
+                        await self.async_send_action_2(DeviceType.LIGHT, "magic_echo")
+                        continue
+
                     self._last_rx_monotonic = asyncio.get_running_loop().time()
                     self.controller.feed(chunk)
         except asyncio.CancelledError:
             LOGGER.debug("Read loop cancelled")
             raise
+
+    async def async_send_action_2(self, key: DeviceKey, action: str, **kwargs) -> bool:
+        item = _CmdItem(key=key, action=action, kwargs=kwargs)
+        await self._tx_queue.put(item)
 
     async def async_send_action(self, key: DeviceKey, action: str, **kwargs) -> bool:
         item = _CmdItem(key=key, action=action, kwargs=kwargs)
@@ -291,6 +301,21 @@ class KocomGateway:
             while True:
                 item = await self._tx_queue.get()
                 if item is None:
+                    continue
+
+                if "magic_echo" == item.action :
+                    # serve의 [ECHO]에대한 응답
+                    LOGGER.debug("TX '%s'...", item.action)
+                    packet = bytes([0x5b,0x45,0x43,0x48,0x4f,0x5d]) # [ECHO]
+                    
+                    # 전송
+                    try:
+                        await self.conn.send(packet)
+                    except Exception as e:
+                        LOGGER.warning("Send failed on attempt %d: %s", attempt, e)
+
+                    item.future.set_result(True)
+                    self._tx_queue.task_done()
                     continue
 
                 # generate packet & expect predicate
