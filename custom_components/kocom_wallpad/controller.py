@@ -594,7 +594,7 @@ class KocomController:
 
     def build_expectation(self, key: DeviceKey, action: str, **kwargs: Any) -> Tuple[Predicate, float]:
         dt = key.device_type
-        if dt in (DeviceType.LIGHT, DeviceType.LIGHTCUTOFF, DeviceType.OUTLET, DeviceType.ELEVATOR):
+        if dt in (DeviceType.LIGHT, DeviceType.LIGHTCUTOFF, DeviceType.OUTLET):
             return self._expect_for_switch_like(key, action, **kwargs)
         if dt == DeviceType.VENTILATION:
             return self._expect_for_ventilation(key, action, **kwargs)
@@ -603,7 +603,9 @@ class KocomController:
         if dt == DeviceType.THERMOSTAT:
             return self._expect_for_thermostat(key, action, **kwargs)
         if dt == DeviceType.AIRCONDITIONER:
-            return self._expect_for_airconditioner(key, action, **kwargs)            
+            return self._expect_for_airconditioner(key, action, **kwargs)
+        if dt == DeviceType.ELEVATOR:
+            return self._match_key_and(key, lambda _d: True), CMD_CONFIRM_TIMEOUT
         return self._match_key_and(key, lambda _d: False), CMD_CONFIRM_TIMEOUT
 
     def generate_command(self, key: DeviceKey, action: str, **kwargs) -> Tuple[bytes, Predicate, float]:
