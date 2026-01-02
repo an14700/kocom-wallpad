@@ -312,7 +312,7 @@ class KocomGateway:
                     try:
                         await self.conn.send(packet)
                     except Exception as e:
-                        LOGGER.warning("Send failed on attempt %d: %s", attempt, e)
+                        LOGGER.warning("Send failed : %s", e)
 
                     item.future.set_result(True)
                     self._tx_queue.task_done()
