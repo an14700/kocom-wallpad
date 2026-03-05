@@ -108,7 +108,13 @@ class AsyncConnection:
 
         if self._writer is not None:
             self._writer.close()
-            await self._writer.wait_closed()
+            try:
+                await asyncio.wait_for(self._writer.wait_closed(), timeout=1.0)
+            except asyncio.TimeoutError:
+                LOGGER.warning("wait_closed() timeout during reconnect")
+        
+        self._writer = None
+        self._reader = None
         
         LOGGER.info("Connection lost. Reconnecting in %.1f sec...", delay)
         await asyncio.sleep(delay)
