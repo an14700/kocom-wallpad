@@ -27,6 +27,7 @@ class AsyncConnection:
         self._last_activity_mono: float = time.monotonic()
         self._last_reconn_delay: float = 0.0
         self._connected = True
+        self._reconnect_lock = asyncio.Lock()
 
     async def open(self) -> None:
         try:
@@ -92,13 +93,18 @@ class AsyncConnection:
             return b""
         except Exception as e:
             LOGGER.warning("Recv failed: %r", e)
+            LOGGER.debug("calling reconnect()")
             await self.reconnect()
+            # asyncio.create_task(self.reconnect())
+            LOGGER.debug("after reconnect")
             return b""
         if chunk:
             self._touch()
         return chunk
 
     async def reconnect(self) -> None:
+        # async with self._reconnect_lock:
+        LOGGER.debug("reconnect() entered")
         self._connected = False
         delay_min, delay_max = self.reconnect_backoff
         if self._last_reconn_delay > 0.0:
