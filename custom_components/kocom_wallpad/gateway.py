@@ -164,7 +164,7 @@ class KocomGateway:
                 if chunk:
                     if "5b4543484f5d" == chunk.hex() :
                         # [ECHO] 패킷에 대한 처리
-                        LOGGER.debug("echo Packet received raw=%s", chunk.hex())
+                        # LOGGER.debug("echo Packet received raw=%s", chunk.hex())
                         await self.async_send_action_2(DeviceType.LIGHT, "magic_echo")
                         continue
 
@@ -305,7 +305,7 @@ class KocomGateway:
 
                 if "magic_echo" == item.action :
                     # serve의 [ECHO]에대한 응답
-                    LOGGER.debug("TX '%s'...", item.action)
+                    # LOGGER.debug("TX '%s'...", item.action)
                     packet = bytes([0x5b,0x45,0x43,0x48,0x4f,0x5d]) # [ECHO]
                     
                     # 전송

@@ -74,7 +74,12 @@ class AsyncConnection:
         if not self._writer:
             raise RuntimeError("connection not open")
         try:
-            LOGGER.debug("Sending: %s", data.hex())
+            if data == bytes([0x5b,0x45,0x43,0x48,0x4f,0x5d]) :  # [ECHO] 패킷
+                # LOGGER.debug("Sending echo packet: %s", data.hex())
+                pass
+            else:
+                LOGGER.debug("Sending: %s", data.hex())
+
             self._writer.write(data)
             await self._writer.drain()
             self._touch()
