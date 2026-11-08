@@ -230,6 +230,7 @@ class KocomGateway:
 
     async def _async_put_entity_dispatch_packet(self, entity_id: str) -> None:
         restore_data = restore_state.async_get(self.hass)
+        # https://github.com/m9suho/kocom-wallpad/commit/96933c5628e02cb9115db2f5b45a0b623451e7d1
         # HA 2026.11+ replaced RestoreStateData.last_states with
         # async_get_stored_state(); keep the old lookup for older cores.
         if hasattr(restore_data, "async_get_stored_state"):
